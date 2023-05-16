@@ -1,193 +1,184 @@
-# License
-The use of source code and its binary are governed by terms of use which can be found at https://neuton.ai/license. Any use in violation thereof is strictly prohibited.
+# Neuton C Library
+
+Neuton, our unique neural network framework, natively creates incredibly compact and accurate models that can easily be deployed into your firmware project using an automatically generated archive with a C library.
+
+The library is written in accordance with the C99 standard, so it is universal and does not have strict requirements for the hardware. The ability to use the library depends mainly on the amount of memory available for its operation.
 
 # How to integrate Neuton into your firmware project 
 
-## Include header file
+## Neuton folder structure
 
-Copy all files from this archive to your project and include header file:
+There are only two folders that should be added to your project for integrating Neuton:
+ * `neuton` - main framework folder in which all Neuton algorithms, utilities, are located;
+    * for **Non-enterprise** users, only precompiled libraries are available in the `./neuton/lib` folder
+    * for **Enterprise** users, Neuton source code is available in the `./neuton/source` folder
+ * `neuton_generated` - folder containing all user solution-specific files (neural network model, data preprocessing configuration, etc).
+
+Also, you should add folder where  `./neuton_generated` is located and `./neuton/include` folder to your project INCLUDE paths.
+
+## Use Neuton in your project
+
+First of all, you need to include the main header file of Neuton:
 ``` C
-#include "neuton.h"
+#include <neuton/neuton.h>
 ```
+For making an inference with Neuton, there are only 3 functions that you should use:
+* `neuton_nn_setup` - Set up the internal components of Neuton, should be called first and once;
+* `neuton_nn_feed_inputs` - Feed and prepare live input features for model inference;
+* `neuton_nn_run_inference` - Run live input features into a Neuton machine learning algorithm (or “ML model”) to calculate an output;
 
-The library contains functions to get model information such as:
-* task type (regression, classification, etc.);
-* neurons and weights count;
-* window buffer size;
-* input and output features count;
-* model size and RAM usage;
-* float support flag;
-* quantization level.
+### Feed input values
 
-Main functions are:
-* `neuton_model_set_inputs` - to set input values;
-* `neuton_model_run_inference` - to make predictions.
-
-
-## Set input values
-
-Make an array with model inputs. Inputs count and order should be the same as in the training dataset.
+Make an array with model raw input features(signal data). Inputs count and order should be **the same** as in the training dataset.
 
 ``` C
-input_t inputs[] = {
-    feature_0,
-    feature_1,
+neuton_input_t raw_inputs[] = {
+    raw_input_0,
+    raw_input_1,
     // ...
-    feature_N
+    raw_input_N
 };
 ```
-
-Pass this array to the `neuton_model_set_inputs` function. 
-
-If the digital signal processing option was selected on the platform, you should call `neuton_model_set_inputs` multiple times for each sample to fill internal window buffer. Function will return `0` when buffer is full, this indicates that the model is ready for prediction.
-
-
-##	Make prediction
-
-When buffer is ready, you should call `neuton_model_run_inference` with two arguments:
-* pointer to `index` of predicted class;
-* pointer to neural net `outputs` (dimension of array can be read using the `neuton_model_outputs_count` function).
-
-For regression task output value will be stored at `outputs[0]`.
-For classification task `index` will contain class index with maximal probability, `outputs` will contain probabilities of each class. Thus, you can get predicted class probability at `outputs[index]`.
-
-Function will return `0` on successful prediction.
+Pass this input array to the `neuton_nn_feed_inputs` function.
 ``` C
-if (neuton_model_set_inputs(inputs) == 0)
+neuton_nn_setup();
+
+neuton_inference_input_t* p_input = neuton_nn_feed_inputs(raw_inputs, neuton_nn_uniq_inputs_num());
+
+if (p_input != NULL)
 {
-    uint16_t index;
-    float* outputs;
-    
-    if (neuton_model_run_inference(&index, &outputs) == 0)
+    //make inference
+}
+```
+In case the Neuton solution needs to collect a data window, you can use the following sample-by-sample feed algorithm:
+``` C
+neuton_nn_setup();
+
+for (size_t i = 0; i < neuton_nn_input_window_size(); i++)
+{
+    neuton_inference_input_t* p_input = neuton_nn_feed_inputs(raw_inputs, neuton_nn_uniq_inputs_num());
+    if (p_input != NULL)
     {
-        // code for handling prediction result
+        //make inference
+        break;
+    }
+    raw_inputs += neuton_nn_uniq_inputs_num();
+}
+```
+Or feed all input samples at once:
+``` C
+neuton_nn_setup();
+
+neuton_inference_input_t* p_input;
+p_input = neuton_nn_feed_inputs(raw_inputs, neuton_nn_uniq_inputs_num() * neuton_nn_input_window_size());
+
+if (p_input != NULL)
+{
+    //make inference
+}
+```
+###	Run Inference
+
+When input buffer is ready for running inference, you should call `neuton_nn_run_inference` with three arguments:
+* `p_input` - Input features for model inference, obtained from @ref neuton_nn_feed_inputs() API call
+* `p_index` - Index of predicted target(class) with highest probability;
+* `pp_outputs` - Pointer to pointer to the internal buffer with all predicted outputs, contains predicted target variable (for regression task) or probabilities of each class (binary/multi classification tasks).
+
+### Wrapping everything together
+
+``` C
+/** Setup Neuton */
+neuton_nn_setup();
+
+/** Feed and prepare raw inputs for the model inference */
+neuton_inference_input_t* p_input;
+p_input = neuton_nn_feed_inputs(raw_inputs, neuton_nn_uniq_inputs_num() * neuton_nn_input_window_size());
+
+/** Run inference */
+if (p_input)
+{
+    neuton_u16_t predicted_target;
+    const neuton_output_t* probabilities;
+    neuton_i16_t outputs_num = neuton_nn_run_inference(p_input, &predicted_target, &probabilities);
+
+    if (outputs_num > 0)
+    {
+        printf("Predicted target %d with probability %f\r\n", predicted_target, probabilities[predicted_target]);
+
+        printf("All probabilities:\r\n");
+        for (size_t i = 0; i < outputs_num; i++)
+            printf("%f,", probabilities[i]);
     }
 }
 ```
-
-## Map predicted results on the required values (for Classification task type)
+### Map predicted results on the required values (for Classification task type)
 
 Inference results are encoded (0…n). For mapping on your classes, use dictionaries `binary_target_dict_csv.csv / multi_target_dict_csv.csv`.
 
-##	Integration with Tensorflow, ONNX
+### Additional solution information API
 
-Neuton also offers additional options of integration and interaction with your model.
-This archive provides you with Tensorflow and ONNX formats of the model.
-You can find them in the `converted_models` folder.
+You can use the following API to get solution information:
+* `neuton_nn_solution_id_str` - Get solution ID in string format;
+* `neuton_nn_uniq_inputs_num` - Get number of unique input features on which the model was trained;
+* `neuton_nn_input_window_size` - Get input features window size in feature samples(vectors);
+* `neuton_nn_model_neurons_num` - Get number of model neurons;
+* `neuton_nn_model_weights_num` - Get number of model weights;
+* `neuton_nn_model_outputs_num` - Get number of model outputs (predicted targets);
+* `neuton_nn_model_task` - Get model task : NEUTON_NN_TASK_MULT_CLASS, NEUTON_NN_TASK_BIN_CLASS, NEUTON_NN_TASK_REGRESSION
+* `neuton_nn_model_size` - Get model size in bytes (flash usage)
+* `neuton_nn_model_bitdepth` - Get model bit depth (8/16/32 bit)
+* `neuton_nn_input_scaling` - Get solution input scaling type: NEUTON_NN_INPUT_SCALING_UNIFIED, NEUTON_NN_INPUT_SCALING_UNIQUE
 
-##	Audio preprocessing and prediction
+# Audio preprocessing and prediction
 
-Since Neuton makes predictions by vector of data, sound flow must be preprocessed first. Preprocessing is made by the KWS (keyword spotting) pipeline. Here is a code example of preprocessing initialization:
-
+Audio preprocessing is not integrated into the common Neuton pipeline, but we provide a set of algorithms and an external audio frontend for possible integration.
+You can find audio Keyword Spotting frontend in the `pipeline/kws/neuton_kws_frontend.h`
+Here is a code example of audio preprocessing with Neuton:
 ``` C
 
-#include "neuton/neuton.h"
-#include "pipeline/kws/kws.h"
-...
+#include <neuton/neuton.h>
+#include <neuton_generated/neuton_user_data_prep_config.h>
+#include <pipeline/kws/neuton_kws_frontend.h>
+#include <string.h>
 
-#if (MEL_SPECTROGRAM_NORMALIZATION == 1)
-	float* normalizedSpectrum = neuton_model_get_inputs_ptr();	// ptr from neuton input buffer for normalized spectrum
-#else
-	float* normalizedSpectrum = NULL;  // no normalization
-#endif	
-	
-	/*
-	 * Create keyword spotting instance
-	 */
-	keyword_spotting_instance* kws = malloc(sizeof(keyword_spotting_instance));
+static neuton_kws_frontend_ctx_t* kws_frontend = NULL;
 
-	KeywordSpottingInstanceInit(
-		kws, windowSize, windowHop, sampleRate, mfeTimeBands, mfeFreqBands, mfeShift,
-		normalizedSpectrum, OnSpectrumReady, NULL);
-
-```
-Where variables `windowSize`, `windowHop`, `sampleRate`, `mfeTimeBands`, `mfeFreqBands` are set from generated header kws_config.h (neuton/model/kws_config.h) as follows:
-
-``` C
-
-sampleRate = kwsSamplingRate;
-windowSize = kwsWindowLen;
-windowHop = kwsWindowHop;
-mfeFreqBands = kwsMelFreqBands;
-mfeTimeBands = kwsMelTimeBands;
-
-```
-
-Variable `mfeShift` is 0 by default.
-
-`OnSpectrumReady` is a call-back function, that handles a vector with spectrum data, ready for inference (description below).
-
-Subsequent code shows reading of a test wav-file with a KWS processing. MCU firmware developers should prepare data using their own approach to sound flow.
-
-``` C
-
-uint32_t minDataForInference = 1000;
-
-/*
- * Calculate minimum data length for one inference
- */
-minDataForInference = kws->ts.windowSize + (kws->ts.windowHop) * (kws->mfe.melSpectrumTimeBands - 1);
-
-/*
- * Allocate input buffer
- */
-audio_sample_t* input = malloc(sizeof(audio_sample_t) * inputBufferSamplesCapacity);
-
-/*
- * Initialize audio flow emulation
- */
-if (OpenAudioFlowFromFile(filename))
-	return 1;
-
-/*
- * Process audio data
- */
-for (;;)
+static void on_spectrum_ready(void* p_ctx, neuton_f32_t* p_spectrum)
 {
-	/*
-	 * Read audio data block
-	 */
-	uint32_t samplesRead = GetNextAudioBlock(input, inputBufferSamplesCapacity);
-	if (samplesRead <= 0)
-		break;
+	neuton_kws_frontend_ctx_t* p_kws = (neuton_kws_frontend_ctx_t*)p_ctx;
+    neuton_inference_input_t* p_input;
 
-	/*
-	 * Process audio data block
-	 */
-	KeywordSpottingProcessAudio(kws, input, samplesRead);
+    p_input = neuton_nn_feed_inputs(p_spectrum, p_kws->melspectr.freq_bands * p_kws->melspectr.time_bands);
+
+    if (p_input != NULL)
+    {
+        neuton_u16_t predicted_target;
+        neuton_output_t* probabilities;
+        neuton_i16_t outputs_num = neuton_nn_run_inference(p_input, &predicted_target, &probabilities);
+
+        if (outputs_num > 0)
+        {
+            printf("Predicted class %d with probability %f\r\n", predicted_target, probabilities[predicted_target]);
+        }
+    }
 }
 
-```
-When the KWS pipeline has data ready for inference, the `OnSpectrumReady` function is called. Here is an example of inference code:
-
-``` C
-
-void OnSpectrumReady(void *ctx, float* spectrum)
+bool init_audio_frontend(void)
 {
-	keyword_spotting_instance* instance = (keyword_spotting_instance*)ctx;
+	kws_frontend = malloc(sizeof(neuton_kws_frontend_ctx_t));
 
-	/*
-	 * Make prediction
-	 */
-	uint16_t index = 0;
-	float* probabilities;
+    neuton_status_t res = neuton_kws_frontend_init(kws_frontend, NEUTON_DSP_AUDIO_WINDOW_LENGTH,
+                                                NEUTON_DSP_AUDIO_WINDOW_HOP,
+                                                NEUTON_DSP_AUDIO_SAMPLING_RATE_HZ,
+                                                NEUTON_DSP_MELSPECTROGRAM_TIME_BANDS,
+                                                NEUTON_DSP_MELSPECTROGRAM_FREQ_BANDS,
+                                                0, NULL, on_spectrum_ready, kws_frontend);
+    return (res == NEUTON_STATUS_SUCCESS);
+}
 
-#if (MEL_SPECTROGRAM_NORMALIZATION == 0)
-	neuton_model_set_inputs(spectrum); // normalization is not set, setting spectrum data to neuton input buffer
-#endif
-	
-	neuton_model_set_ready_flag();
-	
-	if (0 == neuton_model_run_inference(&index, &probabilities))
-	{
-		if (probabilities[1] >= 0.5)
-			index = 1;
-		else
-			index = 0;
-		
-		fprintf(stdout, "class %u, probability %.2f\n", index, probabilities[index]);		
-		fflush(stdout);
-	}
+void feed_audio_samples(const float* p_audio_samples, size_t samples_num)
+{
+    neuton_kws_frontend_process(kws_frontend, p_audio_samples, samples_num);
 }
 
 ```
