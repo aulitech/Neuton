@@ -1,4 +1,4 @@
-/* 2023-05-15T22:57:30Z */
+/* 2023-06-21T19:45:22Z */
 
 /* ----------------------------------------------------------------------
 Copyright (c) 2022-2023 Neuton.AI, Inc.
@@ -43,13 +43,13 @@ applicable.
 /** Number of input feature samples that should be collected in the input window
  *  feature_sample = 1 * NEUTON_NN_INPUT_UNIQ_FEATURES_NUM
  */
-#define NEUTON_NN_INPUT_FEATURE_WINDOW_SIZE 76
+#define NEUTON_NN_INPUT_FEATURE_WINDOW_SIZE 75
 
 /** Number of input feature samples on that the input window is shifted */
-#define NEUTON_NN_INPUT_FEATURE_WINDOW_SHIFT 76
+#define NEUTON_NN_INPUT_FEATURE_WINDOW_SHIFT 75
 
 /** Number of lag features used from input features window  */
-#define NEUTON_NN_LAG_FEATURES_NUM 76
+#define NEUTON_NN_LAG_FEATURES_NUM 75
 
 /** Determines if NN used only input unprocessed features for inference */
 #define NEUTON_NN_USE_INPUT_FEATURES 0
