@@ -1,4 +1,4 @@
-/* 2023-06-21T19:45:22Z */
+/* 2023-07-10T21:24:42Z */
 
 /* ----------------------------------------------------------------------
 Copyright (c) 2022-2023 Neuton.AI, Inc.
@@ -43,25 +43,25 @@ applicable.
 /** Number of input feature samples that should be collected in the input window
  *  feature_sample = 1 * NEUTON_NN_INPUT_UNIQ_FEATURES_NUM
  */
-#define NEUTON_NN_INPUT_FEATURE_WINDOW_SIZE 75
+#define NEUTON_NN_INPUT_FEATURE_WINDOW_SIZE 200
 
 /** Number of input feature samples on that the input window is shifted */
-#define NEUTON_NN_INPUT_FEATURE_WINDOW_SHIFT 75
+#define NEUTON_NN_INPUT_FEATURE_WINDOW_SHIFT 128
 
 /** Number of lag features used from input features window  */
-#define NEUTON_NN_LAG_FEATURES_NUM 75
+#define NEUTON_NN_LAG_FEATURES_NUM 0
 
 /** Determines if NN used only input unprocessed features for inference */
 #define NEUTON_NN_USE_INPUT_FEATURES 0
 
 /** Determines the presence of a unique scaling factors for each input(LAG) feature  */
-#define NEUTON_NN_USE_UNIQ_INPUT_SCALING 1
+#define NEUTON_NN_USE_UNIQ_INPUT_SCALING 0
 
 /** The maximum number of DSP features that user used for all unique input features */
-#define NEUTON_NN_DSP_FEATURES_NUM 78
+#define NEUTON_NN_DSP_FEATURES_NUM 63
 
 /** Determines the presence of a unique mask for DSP feature calculation for each unique input feature */
-#define NEUTON_NN_USE_UNIQ_DSP_MASK 0
+#define NEUTON_NN_USE_UNIQ_DSP_MASK 1
 
 /** Determines if features use feature clipping */
 #define NEUTON_NN_USE_FEATURE_CLIPPING 1

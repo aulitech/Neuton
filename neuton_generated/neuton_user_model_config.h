@@ -1,4 +1,4 @@
-/* 2023-06-21T19:45:22Z */
+/* 2023-07-10T21:24:42Z */
 
 /* ----------------------------------------------------------------------
 Copyright (c) 2022-2023 Neuton.AI, Inc.
@@ -31,13 +31,13 @@ applicable.
 #ifndef _NEUTON_USER_MODEL_CONFIG_H_
 #define _NEUTON_USER_MODEL_CONFIG_H_
 
-#define NEUTON_NN_MODEL_SOLUTION_ID_STR "80120_Cato_MVP_75Len"
+#define NEUTON_NN_MODEL_SOLUTION_ID_STR "80223_July10_Model"
 #define NEUTON_NN_MODEL_TASK_TYPE 0
 #define NEUTON_NN_MODEL_QTYPE 0
 #define NEUTON_NN_MODEL_FLOAT_SUPPORT 0
 
 #define NEUTON_NN_MODEL_NEURONS_NUM 47
-#define NEUTON_NN_MODEL_WEIGHTS_NUM 296
+#define NEUTON_NN_MODEL_WEIGHTS_NUM 282
 #define NEUTON_NN_MODEL_OUTPUTS_NUM 10
 
 #define NEUTON_NN_OUTPUTS_LOG_SCALED 0
