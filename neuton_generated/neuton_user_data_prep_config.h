@@ -1,4 +1,4 @@
-/* 2023-07-10T21:24:42Z */
+/* 2023-07-11T01:34:40Z */
 
 /* ----------------------------------------------------------------------
 Copyright (c) 2022-2023 Neuton.AI, Inc.
@@ -46,7 +46,7 @@ applicable.
 #define NEUTON_NN_INPUT_FEATURE_WINDOW_SIZE 200
 
 /** Number of input feature samples on that the input window is shifted */
-#define NEUTON_NN_INPUT_FEATURE_WINDOW_SHIFT 128
+#define NEUTON_NN_INPUT_FEATURE_WINDOW_SHIFT 200
 
 /** Number of lag features used from input features window  */
 #define NEUTON_NN_LAG_FEATURES_NUM 0
@@ -58,7 +58,7 @@ applicable.
 #define NEUTON_NN_USE_UNIQ_INPUT_SCALING 0
 
 /** The maximum number of DSP features that user used for all unique input features */
-#define NEUTON_NN_DSP_FEATURES_NUM 63
+#define NEUTON_NN_DSP_FEATURES_NUM 50
 
 /** Determines the presence of a unique mask for DSP feature calculation for each unique input feature */
 #define NEUTON_NN_USE_UNIQ_DSP_MASK 1
