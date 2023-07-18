@@ -1,4 +1,4 @@
-/* 2023-07-11T01:34:40Z */
+/* 2023-07-18T06:25:00Z */
 
 /* ----------------------------------------------------------------------
 Copyright (c) 2022-2023 Neuton.AI, Inc.
@@ -41,12 +41,12 @@ extern "C"
 typedef neuton_f32_t neuton_input_t;
 typedef neuton_f32_t neuton_output_t;
 typedef neuton_f32_t neuton_feature_t;
-typedef neuton_f32_t neuton_coeff_t;
-typedef neuton_f32_t neuton_accum_t;
-typedef neuton_f32_t neuton_weight_t;
+typedef neuton_u8_t neuton_coeff_t;
+typedef neuton_i32_t neuton_accum_t;
+typedef neuton_i8_t neuton_weight_t;
 typedef neuton_u8_t neuton_sources_num_t;
 typedef neuton_u8_t neuton_weights_num_t;
-typedef neuton_f32_t neuton_2x_q_t;
+typedef neuton_i16_t neuton_2x_q_t;
 typedef neuton_u8_t neuton_neurons_num_t;
 
 #ifdef   __cplusplus

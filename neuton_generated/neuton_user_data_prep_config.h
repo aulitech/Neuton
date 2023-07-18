@@ -1,4 +1,4 @@
-/* 2023-07-11T01:34:40Z */
+/* 2023-07-18T06:25:00Z */
 
 /* ----------------------------------------------------------------------
 Copyright (c) 2022-2023 Neuton.AI, Inc.
@@ -35,7 +35,7 @@ applicable.
 #define NEUTON_NN_INPUT_TYPE NEUTON_NN_INPUT_TYPE_F32
 
 /** Number of unique features in the original input sample */
-#define NEUTON_NN_INPUT_UNIQ_FEATURES_NUM 6
+#define NEUTON_NN_INPUT_UNIQ_FEATURES_NUM 7
 
 /** Number of unique features actually used by NN from the original input sample */
 #define NEUTON_NN_INPUT_UNIQ_FEATURES_USED_NUM 6
@@ -58,7 +58,7 @@ applicable.
 #define NEUTON_NN_USE_UNIQ_INPUT_SCALING 0
 
 /** The maximum number of DSP features that user used for all unique input features */
-#define NEUTON_NN_DSP_FEATURES_NUM 50
+#define NEUTON_NN_DSP_FEATURES_NUM 33
 
 /** Determines the presence of a unique mask for DSP feature calculation for each unique input feature */
 #define NEUTON_NN_USE_UNIQ_DSP_MASK 1
@@ -78,7 +78,7 @@ applicable.
 #define NEUTON_DSP_PIPELINE_COMPUTE_ZCR 1
 #define NEUTON_DSP_PIPELINE_COMPUTE_MCR 1
 #define NEUTON_DSP_PIPELINE_COMPUTE_TCR 0
-#define NEUTON_DSP_PIPELINE_COMPUTE_MAD 1
+#define NEUTON_DSP_PIPELINE_COMPUTE_MAD 0
 #define NEUTON_DSP_PIPELINE_COMPUTE_SKEW 0
 #define NEUTON_DSP_PIPELINE_COMPUTE_KUR 0
 #define NEUTON_DSP_PIPELINE_COMPUTE_MOMENTS 0
